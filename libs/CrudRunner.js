@@ -1,23 +1,37 @@
 
 exports.CrudRunner = function() {
+	
+	var req = new XMLHttpRequest();
+	var token="";
+
 	var page = require('webpage').create(),
 		url = '',
 		urlId = '',
 		data = '',
 		data_update = '',
 		data_search='';
-		PAGE_ERROR=0;		
+		PAGE_ERROR=0;	
+		
+		/*
 		page.onConsoleMessage = function(msg) {
-			console.log(msg);
+			// console.log("*",msg);
 		};
 		
 		page.onResourceReceived = function(res) {
 		  if (res.stage === 'end') {
-		    	//console.log('Status code: ',res.status,res.statusText,res.url);
+		    	 console.log('Status code: ',res.status,res.statusText,res.url);
 		    	if(res.status!=200 && res.status!=401){
 		    		PAGE_ERROR=1;
 		    	}
 		  }
+		};
+		var settings = {
+		  operation: "POST",
+		  encoding: "utf8",
+		  headers: {
+			"Content-Type": "multipart/form-data"
+		  },
+		  data: {}
 		};
 
 	 
@@ -65,35 +79,55 @@ exports.CrudRunner = function() {
 		};
 		
 		this.post = function (callback) {
+			page.customHeaders = {"Content-Type": "multipart/form-data"};
 			send(url,'POST',data,callback,"POST Error ");
 		};
 		this.print = function (msg, value) {
 			console.log(msg, value);
 			console.log("--------------------------------------------------------");	
 		};
+		*/
 		
-		function send(pUrl,pMethod,pData,pCallback,pError){
-			page.open(pUrl, pMethod,pData,function(status) {
-				
-				if (status === "success") {
-						page.injectJs('./js/jquery.min.js');
-						
-						res=page.evaluate(function() {
-							return $("body").text();
-						})
-						if(PAGE_ERROR==1){
-							console.log(res);	
-						}else{
-							pCallback(res);	
-						}
-						
-						
-					} else {
-						phantom.exit(1);
-					}
+		this.setToken=function(value){
+			token=value;
+		}
+	
+		this.post = function (url,operation,data,callback) {
+			console.log(operation+" - "+url);
+		 	req.open(operation, url, false); 
+			req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+			req.setRequestHeader("Authorization", "Bearer "+token)
 			
+			
+			req.send(data);
+			
+			if (req.status == 200){
+				callback( req.responseText)
+			}else{
+				callback( req.responseText)
+			}
+		};
+		
+		/*
+		function send(pUrl,pMethod,pData,pCallback,pError){
+			console.log(pUrl,"-",pMethod,"...");	
+			settings.data=pData;
+			settings.operation=pMethod;
+			page.open(pUrl, settings,function(status) {
+				page.injectJs('./js/jquery.min.js');
+				if (status === "success") {
+						res=page.evaluate(function() {
+							console.log("2. Evaluate: ",$("body").text());	
+							return  $("body").text();
+						})
+						pCallback(res);	
+					} else{
+						console.log("res",res)
+					}
+				phantom.exit(1);
 			});
 			
 		}
+		*/
 }
  
